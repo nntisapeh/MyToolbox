@@ -17,12 +17,12 @@ pj_laea = pyproj.Proj(proj='laea', lat_0=90, lon_0=0, x_0=0, y_0=0,
 class SeismicNetwork(object):
     def __init__(self, net_lats, net_lons):
         poly_x, poly_y = pyproj.transform(wgs84, pj_laea, net_lons, net_lats)
-        self.network = MultiPoint(zip(net_lons, net_lats)).convex_hull
+        self.polygon = MultiPoint(zip(poly_x, poly_y)).convex_hull
 
     def contains(self, lat, lon):
         x, y = pyproj.transform(wgs84, pj_laea, lon, lat)
         point = Point(x, y)
-        if self.network.contains(point):
+        if self.polygon.contains(point):
             return True
         else:
             return False
@@ -48,6 +48,6 @@ class SeismicNetwork(object):
         r = []
         for i, (x, y) in enumerate(zip(epi_x, epi_y)):
             epicenter = Point(x, y)
-            if epicenter.within(self.network):
+            if epicenter.within(self.polygon):
                 r.append((epi_lats[i], epi_lons[i]))
         return np.array(r)
